@@ -34,32 +34,28 @@ void setup() {
 
 void loop() {
     int data = analogRead(PIN_GSR);
-    data = min(data, MAX_GSR); //センサーの最大値を超えたら最大値とする
+    data = min(data, MAX_GSR); //センサーの最大値を超えたら最大値に固定
 
     //Serial.println(data);
     gsrs[pointer++] = data;
 
-    if(pointer % 600 == 0) {
+    if(pointer % 10 == 0) {
         int n = pointer;
-        //最小値
-        int min_gsr = MAX_GSR;
-        for(int i = 0; i < n; i++) {
-            min_gsr = min(gsrs[i], min_gsr);
-        }
 
-        int sum = 0;
+        long sum = 0;
         for(int i = 0; i < n; i++) {
-            sum += gsrs[i] - min_gsr;
+            sum += gsrs[i];
         }
-        Serial.print("min_gsr=");
-        Serial.println(min_gsr);
-        double auc = (double)sum / n;
+        
+        double avg_gsr = (double)sum / n;
 
-        auc = (2048-auc)/((4096+2*auc)*10000);//校正
-        auc = auc * 1000000;//単位をuSに
-        Serial.print("auc=");
-        Serial.print(auc);
+        avg_gsr = (2048-avg_gsr)/((4096+2*avg_gsr)*10000);//校正
+        avg_gsr = avg_gsr * 1000000;//単位をuSに
+        Serial.print("gsr=");
+        Serial.print(avg_gsr);
         Serial.println("uS");
+        Serial.print("arousal=");
+        Serial.println(avg_gsr / 50 * 8 + 1);//1-9にノーマライズ
         pointer = 0;
     }
     
